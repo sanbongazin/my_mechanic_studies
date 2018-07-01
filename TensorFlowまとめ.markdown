@@ -71,7 +71,7 @@ Placeholderに{}内の関数をぶち込んで行くという意味。なので
 pd.cancat([df1,df2])は配列を合成している。
 
 ## tf.mutmulについて
-Xに含まれるデータと同じ個数の要素を持つベクトルになります。
+Xに含まれるデータと同じ個数の要素を持つベクトルになります。行列のかけ算を行う関数
 
 ## ブロードキャストルール
 TensorFlowのみに適用される特別ルール。
@@ -127,5 +127,52 @@ for x2 in np.linspace(-15, 15, 100):
     for x1 in np.linspace(-15, 15, 100):
         locations.append((x1, x2))
 ```
-この記法になっているのは、x1,x2平面を100＊100の領域に分割して、それぞれの代表の座標を１次元のリストlocationに格納
+この記法になっているのは、x1,x2平面を100＊100の領域に分割して、それぞれの代表の座標を１次元のリストlocationに格納する。
 
+
+```python
+p_vals = sess.run(p, feed_dict={x:locations})
+p_vals = p_vals.reshape((100, 100))
+
+```
+このリストを、Placeholder xに格納した状態で、計算値Pを評価する。 各点に於けるP(x1,x2)を格納したリストを取得する
+
+```python
+#MLE-10
+w0_val, w_val = sess.run([w0, w])
+w0_val, w1_val, w2_val = w0_val[0], w_val[0][0], w_val[1][0]
+print (w0_val, w1_val, w2_val)
+
+train_set0 = train_set[train_set['t']==0]
+train_set1 = train_set[train_set['t']==1]
+
+#MLE11
+fig = plt.figure(figsize=(6,6))
+subplot = fig.add_subplot(1,1,1)
+subplot.set_ylim([0,30])
+subplot.set_xlim([0,30])
+subplot.scatter(train_set1.x1, train_set1.x2, marker='x')
+subplot.scatter(train_set0.x1, train_set0.x2, marker='o')
+
+linex = np.linspace(0,30,10)
+liney = - (w1_val*linex/w2_val + w0_val/w2_val)
+subplot.plot(linex, liney)
+
+field = [[(1 / (1 + np.exp(-(w0_val + w1_val*x1 + w2_val*x2))))
+          for x1 in np.linspace(0,30,100)]
+         for x2 in np.linspace(0,30,100)]
+subplot.imshow(field, origin='lower', extent=(0,30,0,30),
+               cmap=plt.cm.gray_r, alpha=0.5)
+```
+
+隠れ層のノードの数を設定することで、領域の分割数を増やすことに相当する。ノードの数だけ、分割線が得られることになり、各領域を特徴付ける変数が増えることになる。M個のノードになった場合、関数は以下のようになる。
+
+```
+P(x1,x2,x3・・・,xM)
+```
+
+となる。隠れ層が増えれば増えるほどに、複雑なデータ配置にフィットしたより正確な分類が可能。
+
+##3-2 単層ニューラルネットワークによる手書き文字の認識
+
+## 3-3 多層ニューラルネットワークへの拡張
