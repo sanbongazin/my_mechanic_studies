@@ -176,3 +176,44 @@ P(x1,x2,x3・・・,xM)
 ##3-2 単層ニューラルネットワークによる手書き文字の認識
 
 ## 3-3 多層ニューラルネットワークへの拡張
+４つの領域に分割できるかどうか？
+＝＞不可能。
+
+![](スクリーンショット 0030-07-01 午後1.32.16.png)
+
+
+互いに異なるタイプのデータがある場合は分類が不可能。
+例えば、第一象限と第三象限の所に１のデータがある時は不可能だよな？
+
+これは、出力層をニューラルネットワークにすることで解決可能。
+=>隠れ層が２層であればOK
+
+以下のコードが隠れ層の生成。これを理解して、隠れ層を拡張していくことができれば、理解はしていることになるだろう
+
+```python
+# 隠れ層のノード数の指定
+num_units1 = 2
+num_units2 = 2
+
+x = tf.placeholder(tf.float32, [None, 2])
+
+# 一層目
+w1 = tf.Variable(tf.truncated_normal([2, num_units1]))
+b1 = tf.Variable(tf.zeros([num_units1]))
+hidden1 = tf.nn.tanh(tf.matmul(x, w1)+b1)
+
+# 二層目（XOR演算）
+w2 = tf.Variable(tf.truncated_normal([num_units1, num_units2]))
+b2 = tf.Variable(tf.zeros([num_units2]))
+hidden2 = tf.nn.tanh(tf.matmul(hidden1, w2) + b2)
+
+# 出力層
+w0 = tf.Variable(tf.zeros([num_units2,1]))
+b0 = tf.Variable(tf.zeros([1]))
+p = tf.nn.sigmoid(tf.matmul(hidden2, w0) + b0)
+```
+
+
+![画像](スクリーンショット 0030-07-01 午後4.17.04.png)
+
+
