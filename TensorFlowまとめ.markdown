@@ -217,3 +217,37 @@ p = tf.nn.sigmoid(tf.matmul(hidden2, w0) + b0)
 ![画像](スクリーンショット 0030-07-01 午後4.17.04.png)
 
 
+実際に、この式が成り立つかどうかを考えて、問題を解くと納得できるはずとのこと
+
+=> 3.8~3.12
+
+```python
+def generate_datablock(n, mu, var, t):
+    data = np.random.multivariate_normal(mu, np.eye(2)*var, n)
+    df = DataFrame(data, columns = ['x1', 'x2'])
+    df['t'] = t
+    return df
+
+# 領域を４分割に作成。これらの値をtrain_setに格納していく
+df0 = generate_datablock(30, [-7,-7], 18, 1)
+df1 = generate_datablock(30, [-7, 7], 18, 0)
+df2 = generate_datablock(30, [ 7,-7], 行うと18, 0)
+df3 = generate_datablock(30, [ 7, 7], 18, 1)
+
+df = pd.concat([df0, df1, df2, df3], ignore_index=True)
+train_set = df.reindex(permutation(df.index)).reset_index(drop=True)
+
+```
+これにより、データの分割をしっかり、４つの領域に分割している。
+
+一つ目の隠れ層は、(x1,x2)平面を４分割して、それぞれに４つの値を振り分けただけ。それが以下のもの。
+
+```python
+# 一層目
+w1 = tf.Variable(tf.truncated_normal([2, num_units1]))
+b1 = tf.Variable(tf.zeros([num_units1]))
+hidden1 = tf.nn.tanh(tf.matmul(x, w1)+b1)
+
+```
+
+hidden1でxと、w1の値の積を求める。そこから、bを足しているため、値をブロードキャストして、演算を行う。これを、ハイパボリックタンジェントで分割を
