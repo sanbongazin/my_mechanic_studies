@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Jupyter Notebook",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "'jupyter notebook'"
+            ],
+            "group": "none",
+            "options": {
+                "cwd": "/my_mechanic_studies"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
