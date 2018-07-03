@@ -6,12 +6,11 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "-c",
-                "'jupyter notebook'"
+                "jupyter-notebook"
             ],
             "group": "none",
             "options": {
-                "cwd": "/my_mechanic_studies"
+                // "cwd": "/my_mechanic_studies"
             },
             "problemMatcher": []
         }
