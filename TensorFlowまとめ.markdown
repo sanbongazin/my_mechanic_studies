@@ -173,7 +173,8 @@ P(x1,x2,x3・・・,xM)
 
 となる。隠れ層が増えれば増えるほどに、複雑なデータ配置にフィットしたより正確な分類が可能。
 
-##3-2 単層ニューラルネットワークによる手書き文字の認識
+## 3-2 単層ニューラルネットワークによる手書き文字の認識
+ソフトマックス関数で
 
 ## 3-3 多層ニューラルネットワークへの拡張
 ４つの領域に分割できるかどうか？
@@ -231,7 +232,7 @@ def generate_datablock(n, mu, var, t):
 # 領域を４分割に作成。これらの値をtrain_setに格納していく
 df0 = generate_datablock(30, [-7,-7], 18, 1)
 df1 = generate_datablock(30, [-7, 7], 18, 0)
-df2 = generate_datablock(30, [ 7,-7], 行うと18, 0)
+df2 = generate_datablock(30, [ 7,-7], 18, 0)
 df3 = generate_datablock(30, [ 7, 7], 18, 1)
 
 df = pd.concat([df0, df1, df2, df3], ignore_index=True)
