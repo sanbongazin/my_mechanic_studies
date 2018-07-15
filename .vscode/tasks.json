@@ -6,13 +6,16 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "jupyter-notebook"
+                // "-c",
+                // "jupyter notebook",
+                "source /Users/yamamotomasaomi/.pyenv/versions/anaconda3-5.1.0/bin/activate makuwo & jupyter notebook",
             ],
             "group": "none",
             "options": {
-                // "cwd": "/my_mechanic_studies"
+                "cwd": "$HOME/documents/github/my_mechanic_studies"
             },
             "problemMatcher": []
         }
+        
     ]
 }
