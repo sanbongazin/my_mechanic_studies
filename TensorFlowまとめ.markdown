@@ -47,46 +47,219 @@
 
 Placeholderと形が合わねぇぞ！みたいなことが書かれていたら、reshapeをかけて、配列の形を調整すること。
 
-# train_stepは、勾配降下法などの探索のための関数。
+## train_stepは、勾配降下法などの探索のための関数。
 train_step = Adamoptimizer　これは、勾配降下法のライブラリ。
 .miniize(loss):誤差関数を使って、パラメータ修正を行う。
 
-# sess = tf.session()の意味
+## sess = tf.session()の意味
 プレースホルダ-にセッションを格納した
 
-# sess.run(tf.global_variables_initializer())
+## sess.run(tf.global_variables_initializer())
 これで、セッションを初期化する（クラスのインスタンスと感覚が似ている。）
 
-# feed_dictの本当の意味
+## feed_dictの本当の意味
 Placeholderに{}内の関数をぶち込んで行くという意味。なので、数や、要素の選択を間違えないようにすること。
 
 <div style = "page-break-before:always"></div>
 
 # 第2章　ロジスティック回帰
 
-# シグモイド関数
+## シグモイド関数
 σ(x) = 1/(1+exp(-x))
 
-# pandas
+## pandas
 pd.cancat([df1,df2])は配列を合成している。
 
-# tf.mutmulについて
-Xに含まれるデータと同じ個数の要素を持つベクトルになります。
+## tf.mutmulについて
+Xに含まれるデータと同じ個数の要素を持つベクトルになります。行列のかけ算を行う関数
 
-# ブロードキャストルール
+## ブロードキャストルール
 TensorFlowのみに適用される特別ルール。
 1. 行列とスカラーの足し算は、各成分に対する足し算になる。
 2. 同じサイズの行列の「＊」で掛け算した場合は、成分ごとの掛け算いなることを示します。
 3. スカラーを受け取る関数を行列に適用すると、各成分で関数が適用される。
 
-# tf.reducesum 
+## tf.reducesum 
 行列、多次元リスト＝＞ベクトルの拡張であるため、多次元リスト全ての要素を足し合わせるという処理を行う。
 
-# tf.sign
+## tf.sign
 ブール値を返す関数
 
-# correct.prediction
+## correct.prediction
 トレーニングセットの各データに基づいて正解したかどうかのBool値を並べた縦ベクトル。
 
-# シグモイド関数
+## シグモイド関数
 シグモイド関数は別称、ロジスティック関数とも呼ばれており、ここで
+
+# 第３章　ニューラルネットワークを用いた分類
+
+## 単層ニューラルネットワークによる二項分類器
+ニューラルネットワークは入力層、隠れ層、出力層に分かれる。隠れ層それぞれのノードでは、入力データを一次関数に代入したものをさらに「活性化関数」で変換された値が出力される。
+
+隠れ層から出力される値z1などの値は、活性化関数h(x)によって定義される。このxが、一次関数で定義されてる値を指している。
+
+z_n = h(w11 * x1+ w21 * x2 + b1)
+
+これをさらにシグモイド関数で、０〜１の確率に変換して値を返している。
+
+２つの値(x1, x2)が隠れ層を通ることで、M個の値のデータに拡張される。
+
+## 隠れ層が果たす役割とは
+tanhの計算は、(x1, x2)のデータをこのデータの平面で上での直線で分割する操作に似ている。
+それを急激に変化させることで、分類を可能としている。
+
+この値をシグモイド関数に打ち込むことで、初めて分類を可能としているわけだ。
+
+今回の場合、z1,z2は４つの領域でそれぞれ決まった値をとるので、結局４つの領域それぞれに異なる確率が割り当てられることになる。
+
+## コードの補足説明 
+num_unitsは、隠れ層のノード数の指定を表している。
+w1,b1はそれぞれ、一次関数と、定数に対応。<br>
+w1は乱数を使っていることに注意する。
+truncated_normalは、指定サイズの多次元リストに対応するVariableを用意して、それぞれの要素を平均0,標準偏差１を、設定する。０を中心にして、およそ、±１の範囲に広がる乱数だと考える。これらの係数を０に初期化すると、最初の状態が誤差関数の底流点に一致して、勾配降下法による、最適化処理ができなくなることがあるため。<br>
+hidden1はZに対応する変数である。multを使う理由は最適化処理を高速にするため。
+
+GradiateDesentOptimizerは学習率を任意で指定できる学習法。
+
+```python
+locations = []
+for x2 in np.linspace(-15, 15, 100):
+    for x1 in np.linspace(-15, 15, 100):
+        locations.append((x1, x2))
+```
+この記法になっているのは、x1,x2平面を100＊100の領域に分割して、それぞれの代表の座標を１次元のリストlocationに格納する。
+
+
+```python
+p_vals = sess.run(p, feed_dict={x:locations})
+p_vals = p_vals.reshape((100, 100))
+
+```
+このリストを、Placeholder xに格納した状態で、計算値Pを評価する。 各点に於けるP(x1,x2)を格納したリストを取得する
+
+```python
+#MLE-10
+w0_val, w_val = sess.run([w0, w])
+w0_val, w1_val, w2_val = w0_val[0], w_val[0][0], w_val[1][0]
+print (w0_val, w1_val, w2_val)
+
+train_set0 = train_set[train_set['t']==0]
+train_set1 = train_set[train_set['t']==1]
+
+#MLE11
+fig = plt.figure(figsize=(6,6))
+subplot = fig.add_subplot(1,1,1)
+subplot.set_ylim([0,30])
+subplot.set_xlim([0,30])
+subplot.scatter(train_set1.x1, train_set1.x2, marker='x')
+subplot.scatter(train_set0.x1, train_set0.x2, marker='o')
+
+linex = np.linspace(0,30,10)
+liney = - (w1_val*linex/w2_val + w0_val/w2_val)
+subplot.plot(linex, liney)
+
+field = [[(1 / (1 + np.exp(-(w0_val + w1_val*x1 + w2_val*x2))))
+          for x1 in np.linspace(0,30,100)]
+         for x2 in np.linspace(0,30,100)]
+subplot.imshow(field, origin='lower', extent=(0,30,0,30),
+               cmap=plt.cm.gray_r, alpha=0.5)
+```
+
+隠れ層のノードの数を設定することで、領域の分割数を増やすことに相当する。ノードの数だけ、分割線が得られることになり、各領域を特徴付ける変数が増えることになる。M個のノードになった場合、関数は以下のようになる。
+
+```
+P(x1,x2,x3・・・,xM)
+```
+
+となる。隠れ層が増えれば増えるほどに、複雑なデータ配置にフィットしたより正確な分類が可能。
+
+## 3-2 単層ニューラルネットワークによる手書き文字の認識 p.66
+ソフトマックス関数で一次関数と、活性化関数で隠れ層の出力を得る。
+その出力を元にして、０〜９の数字を判断する。
+
+
+## TensorBord
+意図した通りのコードが書けているのかの確認が可能なツール。ただし、以下の点に注意する必要がある
+
+* with構文を用いたグラフのコンテキスト内にプレースホルダーなどの計算値を打ち込むこと
+* with構文で入力層、隠れ層、出力層などに構成層を用意する必要がある
+* ネットワークグラフに付与するラベル名をコード内で指定する
+* グラフに表示するパラメータを宣言して、SummaryWriterオブジェクトでデータを書き出す。
+
+with構文でコードを記載する際に各種の定義の１つのブロックにあ止める必要があり、Jupyterのノートブック上での複数のセルに分けてコードを記述するのが難しくなるはずニューラルネットワークの構成要素は今回は、１つのクラスにまとめた
+
+
+
+
+## 3-3 多層ニューラルネットワークへの拡張
+４つの領域に分割できるかどうか？
+＝＞不可能。
+
+互いに異なるタイプのデータがある場合は分類が不可能。
+例えば、第一象限と第三象限の所に１のデータがある時は不可能だよな？
+
+これは、出力層をニューラルネットワークにすることで解決可能。
+=>隠れ層が２層であればOK
+
+以下のコードが隠れ層の生成。これを理解して、隠れ層を拡張していくことができれば、理解はしていることになるだろう
+
+```python
+# 隠れ層のノード数の指定
+num_units1 = 2
+num_units2 = 2
+
+x = tf.placeholder(tf.float32, [None, 2])
+
+# 一層目
+w1 = tf.Variable(tf.truncated_normal([2, num_units1]))
+b1 = tf.Variable(tf.zeros([num_units1]))
+hidden1 = tf.nn.tanh(tf.matmul(x, w1)+b1)
+
+# 二層目（XOR演算）
+w2 = tf.Variable(tf.truncated_normal([num_units1, num_units2]))
+b2 = tf.Variable(tf.zeros([num_units2]))
+hidden2 = tf.nn.tanh(tf.matmul(hidden1, w2) + b2)
+
+# 出力層
+w0 = tf.Variable(tf.zeros([num_units2,1]))
+b0 = tf.Variable(tf.zeros([1]))
+p = tf.nn.sigmoid(tf.matmul(hidden2, w0) + b0)
+```
+
+
+実際に、この式が成り立つかどうかを考えて、問題を解くと納得できるはずとのこと
+
+=> 3.8~3.12
+
+```python
+def generate_datablock(n, mu, var, t):
+    data = np.random.multivariate_normal(mu, np.eye(2)*var, n)
+    df = DataFrame(data, columns = ['x1', 'x2'])
+    df['t'] = t
+    return df
+
+# 領域を４分割に作成。これらの値をtrain_setに格納していく
+df0 = generate_datablock(30, [-7,-7], 18, 1)
+df1 = generate_datablock(30, [-7, 7], 18, 0)
+df2 = generate_datablock(30, [ 7,-7], 18, 0)
+df3 = generate_datablock(30, [ 7, 7], 18, 1)
+
+df = pd.concat([df0, df1, df2, df3], ignore_index=True)
+train_set = df.reindex(permutation(df.index)).reset_index(drop=True)
+
+```
+これにより、データの分割をしっかり、４つの領域に分割している。
+
+一つ目の隠れ層は、(x1,x2)平面を４分割して、それぞれに４つの値を振り分けただけ。それが以下のもの。
+
+```python
+# 一層目
+w1 = tf.Variable(tf.truncated_normal([2, num_units1]))
+b1 = tf.Variable(tf.zeros([num_units1]))
+hidden1 = tf.nn.tanh(tf.matmul(x, w1)+b1)
+
+```
+
+hidden1でxと、w1の値の積を求める。そこから、bを足しているため、値をブロードキャストして、演算を行う。これを、ハイパボリックタンジェントで分割を行う。このような役割を持っている「特徴量」を作り出すのが、１つ目の隠れ層の役割となる。
+
+２つ目の隠れ層の役割は、
